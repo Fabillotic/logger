@@ -57,9 +57,11 @@ void log_start_section(char* name) {
 	
 	for(i = 0; i < indent * 4; i++) data[dp++] = ' ';
 	for(len = 0; section[len] != '\0'; len++);
-	for(i = 0; i < (SECTION_LEN - len) / 2; i++) data[dp++] = '=';
+	for(i = 0; i < (SECTION_LEN - len) / 2 - 1; i++) data[dp++] = '=';
+	data[dp++] = ' ';
 	for(i = 0; i < len; i++) data[dp++] = section[i];
-	for(i = 0; i < (SECTION_LEN - len) / 2 + (SECTION_LEN - len) % 2; i++) data[dp++] = '=';
+	data[dp++] = ' ';
+	for(i = 0; i < (SECTION_LEN - len) / 2 + (SECTION_LEN - len) % 2 - 1; i++) data[dp++] = '=';
 	data[dp++] = '\n';
 	data[dp++] = '\0';
 	
@@ -122,16 +124,20 @@ void log_print(size_t prefix, const char *format, ...) {
 void log_end_section() {
 	int i;
 	size_t dp = 0;
-	char* data = malloc(sizeof(char) * (SECTION_LEN + (indent * 4) + 3));
-	
-	for(i = 0; i < indent * 4; i++) data[dp++] = ' ';
-	for(i = 0; i < SECTION_LEN; i++) data[dp++] = '-';
-	data[dp++] = '\n';
-	data[dp++] = '\n';
-	data[dp++] = '\0';
-	
-	_log_print(data);
-	
-	free(data);
-	indent--;
+	char* data;
+
+	if(indent > -1) {
+		data = malloc(sizeof(char) * (SECTION_LEN + (indent * 4) + 3));
+		
+		for(i = 0; i < indent * 4; i++) data[dp++] = ' ';
+		for(i = 0; i < SECTION_LEN; i++) data[dp++] = '-';
+		data[dp++] = '\n';
+		data[dp++] = '\n';
+		data[dp++] = '\0';
+		
+		_log_print(data);
+		
+		free(data);
+		indent--;
+	}
 }
