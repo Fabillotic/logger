@@ -1,16 +1,19 @@
-OBJ = logger.o example.o
-BIN = logger
+BIN = liblogger.a
+OBJ = logger.o
+EXOBJ = example.o
 
 all: ${BIN}
 
-logger.o: logger.c logger.h
-example.o: example.c logger.h
+example: ${EXOBJ} ${BIN}
+	gcc -o $@ ${EXOBJ} -L. -llogger
 
-logger: ${OBJ}
-	${CC} -o $@ ${OBJ}
+${OBJ}:
+${EXOBJ}:
 
-run: all
-	./${BIN}
+${BIN}: ${OBJ}
+	ar rcs $@ ${OBJ}
 
 clean:
-	rm -f ${OBJ} ${BIN}
+	rm -f ${BIN} example ${OBJ} ${EXOBJ}
+
+.PHONY: all clean
