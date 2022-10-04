@@ -10,5 +10,4 @@ Features:
 
 Example available [example.c](example.c)
 
-Example output:
 ![example terminal output](example.png)
