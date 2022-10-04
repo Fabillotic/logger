@@ -1,4 +1,6 @@
 /*
+ * logger v1.0.0
+ *
  * The MIT License (MIT)
  * Copyright (c) 2022 Fabillotic
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
