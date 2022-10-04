@@ -1,7 +1,7 @@
 # logger
-Simple logging utility for C
+### Simple logging utility for C
 
-Features:
+## Features:
 - Simple usage
 - Pretty output
 - Different verbosity level prefixes (INFO, WARN, ERROR, DEBUG) + empty prefix (NONE)
