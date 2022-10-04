@@ -14,6 +14,6 @@ ${BIN}: ${OBJ}
 	ar rcs $@ ${OBJ}
 
 clean:
-	rm -f ${BIN} example ${OBJ} ${EXOBJ}
+	rm -f ${BIN} example ${OBJ} ${EXOBJ} test.txt
 
 .PHONY: all clean
