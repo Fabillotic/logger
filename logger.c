@@ -24,7 +24,7 @@
 #include <stdarg.h>
 #include "logger.h"
 
-struct prefix prefixes[NUM_PREFIXES] = {
+struct verbosity_level levels[NUM_VERBOSITY_LEVELS] = {
 	{.id = NONE , .color_text = NONE_TEXT_COLOR,  .plain_text = NONE_TEXT_PLAIN  },
 	{.id = INFO , .color_text = INFO_TEXT_COLOR,  .plain_text = INFO_TEXT_PLAIN  },
 	{.id = WARN , .color_text = WARN_TEXT_COLOR,  .plain_text = WARN_TEXT_PLAIN  },
@@ -36,12 +36,14 @@ char *section = NULL;
 char *logfile = NULL;
 int indent = -1;
 size_t log_stdout = 0;
+int verbosity = 0;
 
-void log_init(char *fn, size_t mirror) {
+void log_init(int max_verbosity, char *fn, size_t mirror) {
 	FILE *f;
 	
 	logfile = fn;
 	log_stdout = mirror;
+	verbosity = max_verbosity;
 	
 	//Clear logfile
 	if(logfile) {
@@ -90,25 +92,27 @@ void log_start_section(char* name) {
 	free(data);
 }
 
-void log_print(size_t prefix, const char *format, ...) {
+void log_print(size_t level, const char *format, ...) {
 	va_list args;
 	int i;
 	FILE *f;
 	char* prefix_text = NULL;
 	
+	if(level > verbosity) return;
+	
 	if(logfile) {
 		f = fopen(logfile, "a");
 		for(i = 0; i < indent * 4; i++) fputc(' ', f);
-		for(i = 0; i < NUM_PREFIXES; i++) {
-			if(prefixes[i].id == prefix) {
-				prefix_text = prefixes[i].plain_text;
+		for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+			if(levels[i].id == level) {
+				prefix_text = levels[i].plain_text;
 				break;
 			}
 		}
 		if(!prefix_text) {
-			for(i = 0; i < NUM_PREFIXES; i++) {
-				if(prefixes[i].id == NONE) {
-					prefix_text = prefixes[i].plain_text;
+			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+				if(levels[i].id == NONE) {
+					prefix_text = levels[i].plain_text;
 					break;
 				}
 			}
@@ -121,16 +125,16 @@ void log_print(size_t prefix, const char *format, ...) {
 	}
 	if(log_stdout) {
 		for(i = 0; i < indent * 4; i++) putchar(' ');
-		for(i = 0; i < NUM_PREFIXES; i++) {
-			if(prefixes[i].id == prefix) {
-				prefix_text = prefixes[i].color_text;
+		for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+			if(levels[i].id == level) {
+				prefix_text = levels[i].color_text;
 				break;
 			}
 		}
 		if(!prefix_text) {
-			for(i = 0; i < NUM_PREFIXES; i++) {
-				if(prefixes[i].id == NONE) {
-					prefix_text = prefixes[i].color_text;
+			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+				if(levels[i].id == NONE) {
+					prefix_text = levels[i].color_text;
 					break;
 				}
 			}

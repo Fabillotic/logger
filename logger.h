@@ -31,20 +31,24 @@
 #define ERROR_TEXT_PLAIN "ERROR "
 #define DEBUG_TEXT_PLAIN "DEBUG "
 
-#define NUM_PREFIXES 5
+//These are the verbosity levels.
+//When 'max_verbosity' in 'log_init' is set to a value lower than the id, the output is ignored.
+//This allows you to filter out the messages that are unnecessary to you.
+//This also means that setting 'max_verbosity' to 'NUM_VERBOSITY_LEVELS' will log every single message, assuming you don't skip over ids.
+#define NUM_VERBOSITY_LEVELS 5
 #define NONE  0
 #define INFO  1
 #define WARN  2
 #define ERROR 3
 #define DEBUG 4
 
-struct prefix {
+struct verbosity_level {
 	size_t id;
 	char* color_text;
 	char* plain_text;
 };
 
-void log_init(char *fn, size_t mirror);
+void log_init(int max_verbosity, char *fn, size_t mirror);
 void _log_print(char *s);
 void log_start_section(char* name);
 void log_print(size_t prefix, const char *format, ...);

@@ -24,7 +24,7 @@ int main() {
 	char *dangerous = "dangerous >:)\n";
 
 	//Logging to test.txt and stdout
-	log_init("test.txt", 1);
+	log_init(NUM_VERBOSITY_LEVELS, "test.txt", 1);
 	
 	//Simple example
 	log_start_section("Test 1");
