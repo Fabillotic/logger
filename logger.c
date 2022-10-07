@@ -26,11 +26,11 @@
 #include "logger.h"
 
 struct verbosity_level levels[NUM_VERBOSITY_LEVELS] = {
-	{.id = NONE , .color_text = NONE_TEXT_COLOR,  .plain_text = NONE_TEXT_PLAIN  },
-	{.id = INFO , .color_text = INFO_TEXT_COLOR,  .plain_text = INFO_TEXT_PLAIN  },
-	{.id = WARN , .color_text = WARN_TEXT_COLOR,  .plain_text = WARN_TEXT_PLAIN  },
-	{.id = ERROR, .color_text = ERROR_TEXT_COLOR, .plain_text = ERROR_TEXT_PLAIN },
-	{.id = DEBUG, .color_text = DEBUG_TEXT_COLOR, .plain_text = DEBUG_TEXT_PLAIN },
+	{ NONE , NONE_TEXT_COLOR,  NONE_TEXT_PLAIN  },
+	{ INFO , INFO_TEXT_COLOR,  INFO_TEXT_PLAIN  },
+	{ WARN , WARN_TEXT_COLOR,  WARN_TEXT_PLAIN  },
+	{ ERROR, ERROR_TEXT_COLOR, ERROR_TEXT_PLAIN },
+	{ DEBUG, DEBUG_TEXT_COLOR, DEBUG_TEXT_PLAIN },
 };
 
 struct logger_profile *profiles = NULL;
@@ -52,7 +52,7 @@ void log_init(size_t max_verbosity, char *fn, bool color) {
 	if(parent) parent->next = profile;
 	else profiles = profile;
 	
-	//Clear logfile
+	/* Clear logfile */
 	if(profile->logfile) {
 		f = fopen(profile->logfile, "w");
 		fclose(f);
@@ -76,7 +76,8 @@ void _log_print(char *s) {
 }
 
 void log_start_section(char* name) {
-	int i;
+	unsigned int i;
+	int j;
 	size_t len, dp;
 	char* data;
 	
@@ -88,7 +89,7 @@ void log_start_section(char* name) {
 	
 	data[dp++] = '\n';
 	
-	for(i = 0; i < indent * 4; i++) data[dp++] = ' ';
+	for(j = 0; j < indent * 4; j++) data[dp++] = ' ';
 	for(len = 0; section[len] != '\0'; len++);
 	for(i = 0; i < (SECTION_LEN - len) / 2 - 1; i++) data[dp++] = '=';
 	data[dp++] = ' ';

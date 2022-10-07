@@ -5,16 +5,18 @@ INC = logger.h
 EXOBJ = example.o
 EXSRC = example.c
 
+CFLAGS = -ansi -pedantic -Wall -Wextra
+
 all: ${BIN}
 
 example: ${EXOBJ} ${BIN}
 	gcc -o $@ ${EXOBJ} -L. -llogger
 
 ${OBJ}: ${SRC} ${INC}
-	gcc -c ${SRC} -o $@
+	gcc -c ${CFLAGS} ${SRC} -o $@
 
 ${EXOBJ}: ${EXSRC} ${INC}
-	gcc -c ${EXSRC} -o $@
+	gcc -c ${CFLAGS} ${EXSRC} -o $@
 
 ${BIN}: ${OBJ}
 	ar rcs $@ ${OBJ}

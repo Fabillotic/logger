@@ -34,7 +34,7 @@
 #define ERROR_TEXT_PLAIN "ERROR "
 #define DEBUG_TEXT_PLAIN "DEBUG "
 
-//These are the verbosity levels. They are used as bitmasks!
+/* These are the verbosity levels. They are used as bitmasks! */
 #define NUM_VERBOSITY_LEVELS 5
 #define NONE  (1 << 0)
 #define INFO  (1 << 1)
@@ -57,7 +57,7 @@ struct logger_profile {
 	bool colored_output;
 };
 
-//Initialize a logging profile. If fn is NULL, log to stdout.
+/* Initialize a logging profile. If fn is NULL, log to stdout. */
 void log_init(size_t max_verbosity, char *fn, bool color);
 void _log_print(char *s);
 void log_start_section(char* name);
