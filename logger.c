@@ -32,36 +32,44 @@ struct verbosity_level levels[NUM_VERBOSITY_LEVELS] = {
 	{.id = DEBUG, .color_text = DEBUG_TEXT_COLOR, .plain_text = DEBUG_TEXT_PLAIN },
 };
 
-char *section = NULL;
-char *logfile = NULL;
-int indent = -1;
-size_t log_stdout = 0;
-int verbosity = 0;
+struct logger_profile *profiles = NULL;
 
-void log_init(int max_verbosity, char *fn, size_t mirror) {
+char *section = NULL;
+int indent = -1;
+
+void log_init(int max_verbosity, char *fn) {
 	FILE *f;
+	struct logger_profile *profile, *parent;
 	
-	logfile = fn;
-	log_stdout = mirror;
-	verbosity = max_verbosity;
+	profile = malloc(sizeof(struct logger_profile));
+	profile->next = NULL;
+	profile->verbosity = max_verbosity;
+	profile->logfile = fn;
+	
+	for(parent = profiles; parent && parent->next != NULL; parent = parent->next);
+	if(parent) parent->next = profile;
+	else profiles = profile;
 	
 	//Clear logfile
-	if(logfile) {
-		f = fopen(logfile, "w");
+	if(profile->logfile) {
+		f = fopen(profile->logfile, "w");
 		fclose(f);
 	}
 }
 
 void _log_print(char *s) {
+	struct logger_profile *profile;
 	FILE *f;
 	
-	if(logfile) {
-		f = fopen(logfile, "a");
-		fprintf(f, "%s", s);
-		fclose(f);
-	}
-	if(log_stdout) {
-		printf("%s", s);
+	for(profile = profiles; profile; profile = profile->next) {
+		if(profile->logfile) {
+			f = fopen(profile->logfile, "a");
+			fprintf(f, "%s", s);
+			fclose(f);
+		}
+		else {
+			printf("%s", s);
+		}
 	}
 }
 
@@ -94,55 +102,58 @@ void log_start_section(char* name) {
 
 void log_print(size_t level, const char *format, ...) {
 	va_list args;
+	struct logger_profile *profile;
 	int i;
 	FILE *f;
 	char* prefix_text = NULL;
 	
-	if(level > verbosity) return;
-	
-	if(logfile) {
-		f = fopen(logfile, "a");
-		for(i = 0; i < indent * 4; i++) fputc(' ', f);
-		for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-			if(levels[i].id == level) {
-				prefix_text = levels[i].plain_text;
-				break;
-			}
-		}
-		if(!prefix_text) {
+	for(profile = profiles; profile; profile = profile->next) {
+		if(!(level & profile->verbosity)) continue;
+		
+		if(profile->logfile) {
+			f = fopen(profile->logfile, "a");
+			for(i = 0; i < indent * 4; i++) fputc(' ', f);
 			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-				if(levels[i].id == NONE) {
+				if(levels[i].id == level) {
 					prefix_text = levels[i].plain_text;
 					break;
 				}
 			}
-		}
-		fprintf(f, prefix_text);
-		va_start(args, format);
-		vfprintf(f, format, args);
-		va_end(args);
-		fclose(f);
-	}
-	if(log_stdout) {
-		for(i = 0; i < indent * 4; i++) putchar(' ');
-		for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-			if(levels[i].id == level) {
-				prefix_text = levels[i].color_text;
-				break;
+			if(!prefix_text) {
+				for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+					if(levels[i].id == NONE) {
+						prefix_text = levels[i].plain_text;
+						break;
+					}
+				}
 			}
+			fprintf(f, prefix_text);
+			va_start(args, format);
+			vfprintf(f, format, args);
+			va_end(args);
+			fclose(f);
 		}
-		if(!prefix_text) {
+		else {
+			for(i = 0; i < indent * 4; i++) putchar(' ');
 			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-				if(levels[i].id == NONE) {
+				if(levels[i].id == level) {
 					prefix_text = levels[i].color_text;
 					break;
 				}
 			}
+			if(!prefix_text) {
+				for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+					if(levels[i].id == NONE) {
+						prefix_text = levels[i].color_text;
+						break;
+					}
+				}
+			}
+			printf(prefix_text);
+			va_start(args, format);
+			vprintf(format, args);
+			va_end(args);
 		}
-		printf(prefix_text);
-		va_start(args, format);
-		vprintf(format, args);
-		va_end(args);
 	}
 }
 

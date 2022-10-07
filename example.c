@@ -23,8 +23,11 @@
 int main() {
 	char *dangerous = "dangerous >:)\n";
 
-	//Logging to test.txt and stdout
-	log_init(NUM_VERBOSITY_LEVELS, "test.txt", 1);
+	//Log all verbosities to stdout
+	log_init(LOG_ALL, NULL);
+	
+	//Only log INFO and DEBUG to 'test.txt'.
+	log_init(INFO | DEBUG, "test.txt");
 	
 	//Simple example
 	log_start_section("Test 1");
