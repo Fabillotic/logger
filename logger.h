@@ -1,5 +1,5 @@
 /*
- * logger v1.0.3
+ * logger v1.0.4
  *
  * The MIT License (MIT)
  * Copyright (c) 2022 Fabillotic
