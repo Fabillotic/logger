@@ -35,6 +35,7 @@ int main() {
 	log_print(INFO, "Hello, world!\n");
 	log_print(INFO, "Hello, world 2!\n");
 	log_print(NONE, "Can't have -shit- prefixes in Detroit!\n");
+	log_print(ERROR, "This is the first line\nThis is the second\nThis is the third\nAlso no newline:");
 	
 	/* Nested section */
 	log_start_section("Test 2");
@@ -58,6 +59,7 @@ int main() {
 	log_start_section("Section A");
 	log_start_section("Section B");
 	log_start_section("Section C");
+	log_print(ERROR, "NO TRAILING NEWLINE:");
 	log_start_section("Section D");
 	log_print(ERROR, "Having text here looks better.\n");
 	log_end_section();

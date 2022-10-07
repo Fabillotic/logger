@@ -106,9 +106,44 @@ void log_start_section(char* name) {
 void log_print(size_t level, const char *format, ...) {
 	va_list args;
 	struct logger_profile *profile;
-	int i;
+	int i, j, none_prefix_len, format_len, nl, dp, chars_alloc;
 	FILE *f;
-	char* prefix_text = NULL;
+	char *prefix_text = NULL, *nformat = NULL;
+	bool no_trailing_nl, trailing_nl_missing;
+	
+	for(format_len = 0; format[format_len] != '\0'; format_len++);
+	for(none_prefix_len = 0; NONE_TEXT_PLAIN[none_prefix_len] != '\0'; none_prefix_len++);
+	
+	nl = 0;
+	for(i = 0; i < format_len; i++) {
+		if(format[i] == '\n') nl++;
+	}
+	
+	no_trailing_nl = format[format_len-1] != '\n';
+	
+	nl+=no_trailing_nl; /* Final total new lines */
+	
+	chars_alloc = (
+		format_len +
+		1 + /* null-term */
+		no_trailing_nl +
+		(nl - 1) * (none_prefix_len + (indent < 0 ? 0 : indent) * 4) /* extra prefixes minus initial, indentation */
+	);
+	nformat = malloc(sizeof(char) * chars_alloc);
+	dp = 0;
+	
+	for(i = 0; i < format_len; i++) {
+		nformat[dp++] = format[i];
+		trailing_nl_missing = (no_trailing_nl && format[i+1] == '\0');
+		if(trailing_nl_missing) {
+			nformat[dp++] = '\n';
+		}
+		else if(format[i] == '\n' && format[i+1] != '\0') {
+			for(j = 0; j < 4 * indent; j++) nformat[dp++] = ' ';
+			for(j = 0; j < none_prefix_len; j++) nformat[dp++] = NONE_TEXT_PLAIN[j];
+		}
+	}
+	nformat[dp++] = '\0';
 	
 	for(profile = profiles; profile; profile = profile->next) {
 		if(!(level & profile->verbosity)) continue;
@@ -135,7 +170,7 @@ void log_print(size_t level, const char *format, ...) {
 			for(i = 0; i < indent * 4; i++) fputc(' ', f);
 			fprintf(f, prefix_text);
 			va_start(args, format);
-			vfprintf(f, format, args);
+			vfprintf(f, nformat, args);
 			va_end(args);
 			fclose(f);
 		}
@@ -143,10 +178,12 @@ void log_print(size_t level, const char *format, ...) {
 			for(i = 0; i < indent * 4; i++) putchar(' ');
 			printf(prefix_text);
 			va_start(args, format);
-			vprintf(format, args);
+			vprintf(nformat, args);
 			va_end(args);
 		}
 	}
+	
+	free(nformat);
 }
 
 void log_end_section() {
