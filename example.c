@@ -18,16 +18,17 @@
  * */
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include "logger.h"
 
 int main() {
 	char *dangerous = "dangerous >:)\n";
 
-	//Log all verbosities to stdout
-	log_init(LOG_ALL, NULL);
+	//Log all verbosities to stdout, enable color
+	log_init(LOG_ALL, NULL, true);
 	
-	//Only log INFO and DEBUG to 'test.txt'.
-	log_init(INFO | DEBUG, "test.txt");
+	//Only log INFO and DEBUG to 'test.txt', disable color
+	log_init(INFO | DEBUG, "test.txt", false);
 	
 	//Simple example
 	log_start_section("Test 1");

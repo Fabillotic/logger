@@ -19,6 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * */
 
+#include <stdlib.h>
+#include <stdbool.h>
+
 #define SECTION_LEN 50
 #define NONE_TEXT_COLOR  "      "
 #define INFO_TEXT_COLOR  "\033[97;1mINFO  \033[0m"
@@ -49,12 +52,13 @@ struct verbosity_level {
 
 struct logger_profile {
 	struct logger_profile *next;
-	int verbosity;
 	char *logfile;
+	size_t verbosity;
+	bool colored_output;
 };
 
 //Initialize a logging profile. If fn is NULL, log to stdout.
-void log_init(int max_verbosity, char *fn);
+void log_init(size_t max_verbosity, char *fn, bool color);
 void _log_print(char *s);
 void log_start_section(char* name);
 void log_print(size_t prefix, const char *format, ...);

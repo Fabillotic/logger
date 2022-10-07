@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include "logger.h"
 
@@ -37,7 +38,7 @@ struct logger_profile *profiles = NULL;
 char *section = NULL;
 int indent = -1;
 
-void log_init(int max_verbosity, char *fn) {
+void log_init(size_t max_verbosity, char *fn, bool color) {
 	FILE *f;
 	struct logger_profile *profile, *parent;
 	
@@ -45,6 +46,7 @@ void log_init(int max_verbosity, char *fn) {
 	profile->next = NULL;
 	profile->verbosity = max_verbosity;
 	profile->logfile = fn;
+	profile->colored_output = color;
 	
 	for(parent = profiles; parent && parent->next != NULL; parent = parent->next);
 	if(parent) parent->next = profile;
@@ -110,23 +112,26 @@ void log_print(size_t level, const char *format, ...) {
 	for(profile = profiles; profile; profile = profile->next) {
 		if(!(level & profile->verbosity)) continue;
 		
-		if(profile->logfile) {
-			f = fopen(profile->logfile, "a");
-			for(i = 0; i < indent * 4; i++) fputc(' ', f);
+		for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
+			if(levels[i].id == level) {
+				if(profile->colored_output) prefix_text = levels[i].color_text;
+				else prefix_text = levels[i].plain_text;
+				break;
+			}
+		}
+		if(!prefix_text) {
 			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-				if(levels[i].id == level) {
-					prefix_text = levels[i].plain_text;
+				if(levels[i].id == NONE) {
+					if(profile->colored_output) prefix_text = levels[i].color_text;
+					else prefix_text = levels[i].plain_text;
 					break;
 				}
 			}
-			if(!prefix_text) {
-				for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-					if(levels[i].id == NONE) {
-						prefix_text = levels[i].plain_text;
-						break;
-					}
-				}
-			}
+		}
+		
+		if(profile->logfile) {
+			f = fopen(profile->logfile, "a");
+			for(i = 0; i < indent * 4; i++) fputc(' ', f);
 			fprintf(f, prefix_text);
 			va_start(args, format);
 			vfprintf(f, format, args);
@@ -135,20 +140,6 @@ void log_print(size_t level, const char *format, ...) {
 		}
 		else {
 			for(i = 0; i < indent * 4; i++) putchar(' ');
-			for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-				if(levels[i].id == level) {
-					prefix_text = levels[i].color_text;
-					break;
-				}
-			}
-			if(!prefix_text) {
-				for(i = 0; i < NUM_VERBOSITY_LEVELS; i++) {
-					if(levels[i].id == NONE) {
-						prefix_text = levels[i].color_text;
-						break;
-					}
-				}
-			}
 			printf(prefix_text);
 			va_start(args, format);
 			vprintf(format, args);
