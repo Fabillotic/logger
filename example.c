@@ -22,13 +22,14 @@
 #include "logger.h"
 
 int main() {
+	LOGGER *logger;
 	char *dangerous = "dangerous >:)\n";
 	
 	/* Log all verbosities to stdout, enable color */
 	log_init(LOG_ALL, NULL, true);
 	
 	/* Only log INFO and DEBUG to 'test.txt', disable color */
-	log_init(INFO | DEBUG, "test.txt", false);
+	logger = log_init(INFO | DEBUG, "test.txt", false);
 	
 	/* Simple example */
 	log_start_section("Test 1");
@@ -71,6 +72,9 @@ int main() {
 	/* Ending a section that didn't start yet... */
 	log_end_section();
 	log_print(INFO, "S0me testing...\n");
+	
+	log_del(logger);
+	log_print(INFO, "This will not appear in the log file!\n");
 	
 	return 0;
 }

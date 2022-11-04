@@ -33,22 +33,24 @@ struct verbosity_level levels[NUM_VERBOSITY_LEVELS] = {
 	{ DEBUG, DEBUG_TEXT_COLOR, DEBUG_TEXT_PLAIN },
 };
 
-struct logger_profile *profiles = NULL;
+void _log_print(char *s);
+
+LOGGER *profiles = NULL;
 
 char *section = NULL;
 int indent = -1;
 
-void log_init(size_t max_verbosity, char *fn, bool color) {
+LOGGER *log_init(size_t max_verbosity, char *fn, bool color) {
 	FILE *f;
-	struct logger_profile *profile, *parent;
+	LOGGER *profile, *parent;
 	
-	profile = malloc(sizeof(struct logger_profile));
+	profile = malloc(sizeof(LOGGER));
 	profile->next = NULL;
 	profile->verbosity = max_verbosity;
 	profile->logfile = fn;
 	profile->colored_output = color;
 	
-	for(parent = profiles; parent && parent->next != NULL; parent = parent->next);
+	for(parent = profiles; parent && parent->next; parent = parent->next);
 	if(parent) parent->next = profile;
 	else profiles = profile;
 	
@@ -57,10 +59,24 @@ void log_init(size_t max_verbosity, char *fn, bool color) {
 		f = fopen(profile->logfile, "w");
 		fclose(f);
 	}
+	
+	return profile;
+}
+
+void log_del(LOGGER *profile) {
+	LOGGER *parent;
+	
+	if(profile == profiles) profiles = profile->next;
+	else {
+		for(parent = profiles; parent; parent = parent->next) {
+			if(parent->next == profile) parent->next = profile->next;
+		}
+	}
+	free(profile);
 }
 
 void _log_print(char *s) {
-	struct logger_profile *profile;
+	LOGGER *profile;
 	FILE *f;
 	
 	for(profile = profiles; profile; profile = profile->next) {
@@ -105,7 +121,7 @@ void log_start_section(char* name) {
 
 void log_print(size_t level, const char *format, ...) {
 	va_list args;
-	struct logger_profile *profile;
+	LOGGER *profile;
 	int i, j, none_prefix_len, format_len, nl, dp, chars_alloc;
 	FILE *f;
 	char *prefix_text = NULL, *nformat = NULL;

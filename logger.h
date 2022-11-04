@@ -50,6 +50,7 @@ struct verbosity_level {
 	char* plain_text;
 };
 
+typedef struct logger_profile LOGGER;
 struct logger_profile {
 	struct logger_profile *next;
 	char *logfile;
@@ -58,8 +59,8 @@ struct logger_profile {
 };
 
 /* Initialize a logging profile. If fn is NULL, log to stdout. */
-void log_init(size_t max_verbosity, char *fn, bool color);
-void _log_print(char *s);
+LOGGER *log_init(size_t max_verbosity, char *fn, bool color);
+void log_del(LOGGER *profile);
 void log_start_section(char* name);
 void log_print(size_t prefix, const char *format, ...);
 void log_end_section();
