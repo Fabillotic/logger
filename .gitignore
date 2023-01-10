@@ -1,4 +1,4 @@
 *.o
 example
-liblogger.a
+liblogger.so
 test.txt
